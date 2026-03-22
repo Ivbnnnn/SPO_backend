@@ -15,6 +15,10 @@ class Session_Note(Base):
     session_id:Mapped[str] = mapped_column(ForeignKey('session.id'), nullable=False)
     is_private:Mapped[bool] = mapped_column(Boolean, nullable=False)
     comment:Mapped[str] = mapped_column(Text, nullable=False)
+    start_index:Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    end_index:Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+
     
     answers: Mapped[List["Answer"]] = relationship("Answer", back_populates="note", cascade="all, delete-orphan")
     participant: Mapped["Session_Participant"] = relationship(
