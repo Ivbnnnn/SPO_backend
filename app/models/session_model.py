@@ -11,10 +11,12 @@ class Session(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column (String(50), nullable=False)
     book_id: Mapped[int] = mapped_column (ForeignKey('book.id'), nullable=False)
-    is_active: Mapped[bool] = mapped_column (Boolean, nullable=False)
+    is_active: Mapped[bool] = mapped_column (Boolean, nullable=False, default=True)
     user_id: Mapped[int] = mapped_column (ForeignKey('user.id'), nullable=False)
+    link: Mapped[str] = mapped_column(String(100), nullable=False)
 
-    participants: Mapped[List["Session_Participant"]] = relationship("Session_Participant", back_populates='session', cascade="all, delete-orphan")
+
+    participants: Mapped[List["Session_Participant"]] = relationship("Session_Participant", back_populates='session', cascade="all, delete-orphan", lazy="selectin")
     session_notes: Mapped[List["Session_Note"]] = relationship(
         "Session_Note",
         back_populates='session',

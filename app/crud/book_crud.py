@@ -43,9 +43,9 @@ async def create_book(
 
 #bookview
 async def read_book_by_id(book_id:int,db:AsyncSession = Depends(get_session)):    
-    book = db.get(models.Book, book_id)
+    book = await db.get(models.Book, book_id)
     if (not book):
-        return HTTPException(status_code=400, detail="Error")
+        raise HTTPException(status_code=400, detail="Error")
     return book
 
 #UserPage

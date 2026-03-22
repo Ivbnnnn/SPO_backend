@@ -35,6 +35,7 @@ app.include_router(minio_api.minio_router)
 app.include_router(routers.auth_router)
 app.include_router(routers.book_router)
 app.include_router(routers.user_router)
+app.include_router(routers.session_router)
 
 
 @app.on_event("startup")

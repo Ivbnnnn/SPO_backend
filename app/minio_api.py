@@ -19,8 +19,6 @@ logger = logging.getLogger(__name__)
 minio_router = APIRouter()
 
 
-
-
 client = Minio(
     "minio:9000",
     access_key="minioadmin",
