@@ -1,0 +1,18 @@
+# app/models.py
+from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, Text, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from database import Base
+from typing import Optional, List
+from .solo_note_model import Solo_Note
+from .solo_quote_model import Solo_Quote
+
+class Solo_Session(Base):
+    __tablename__ = "solo_sessions"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    book_id: Mapped[int] = mapped_column(ForeignKey('books.id'),nullable=False)
+    last_position: Mapped[int] = mapped_column(Integer,nullable=False)
+    user_id: Mapped[int] = mapped_column (ForeignKey('users.id'), nullable=False)
+    
+    solo_notes: Mapped[List["Solo_Note"]] = relationship("Solo_Note", back_populates='solo_session_id', cascade="all, delete-orphan")
+    solo_quotes: Mapped[List["Solo_Note"]] = relationship("Solo_Quote", back_populates='solo_session_id', cascade="all, delete-orphan")
+
