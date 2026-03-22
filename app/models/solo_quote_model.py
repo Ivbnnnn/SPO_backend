@@ -10,3 +10,5 @@ class Solo_Quote(Base):
     selected_text:Mapped[str] = mapped_column(Text, nullable=False)
     color:Mapped[str] = mapped_column(String(50), nullable=False)
     solo_session_id:Mapped[str] = mapped_column(ForeignKey('solo_session.id'), nullable=False)
+
+    solo_session:Mapped["Solo_Session"] = relationship("Solo_Session", back_populates='solo_quotes')

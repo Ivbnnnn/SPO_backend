@@ -10,4 +10,8 @@ class Role(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column (String(50), nullable=False, unique=True)
 
-    session_participant: Mapped[List["Session_Participant"]] = relationship("Session_Participant", back_populates='user_id', cascade="all, delete-orphan")
+    participants: Mapped[List["Session_Participant"]] = relationship(
+        "Session_Participant",
+        back_populates="role",
+        cascade="all, delete-orphan"
+    )

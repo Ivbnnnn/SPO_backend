@@ -12,15 +12,15 @@ class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column (String(50), nullable=False)
     last_name: Mapped[str] = mapped_column (String(50), nullable=False)
-    password: Mapped[str] = mapped_column (String(50), nullable=False)
+    password: Mapped[str] = mapped_column (String(250), nullable=False)
     email: Mapped[str] = mapped_column (String(50), nullable=False)
-    background_color: Mapped[str]= mapped_column (String(50), nullable=False)
-    font_size: Mapped[str]= mapped_column (String(50), nullable=False)
+    background_color: Mapped[str]= mapped_column (String(50), default="white")
+    font_size: Mapped[str]= mapped_column (String(50), default="14")
 
 
-    books: Mapped[List["Book"]] = relationship ("Book", back_populates="user_id", cascade="all, delete-orphan")
-    solo_sessions: Mapped[List["Solo_Session"]] = relationship ("Solo_Session", back_populates="user_id", cascade="all, delete-orphan")
-    session_participant: Mapped[List["Session_Participant"]] = relationship("Session_Participant", back_populates='user_id', cascade="all, delete-orphan")
+    books: Mapped[List["Book"]] = relationship ("Book", back_populates="user", cascade="all, delete-orphan")
+    solo_sessions: Mapped[List["Solo_Session"]] = relationship ("Solo_Session", back_populates="user", cascade="all, delete-orphan")
+    session_participant: Mapped[List["Session_Participant"]] = relationship("Session_Participant", back_populates='user', cascade="all, delete-orphan")
     
     
     

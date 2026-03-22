@@ -13,6 +13,9 @@ class Solo_Session(Base):
     last_position: Mapped[int] = mapped_column(Integer,nullable=False)
     user_id: Mapped[int] = mapped_column (ForeignKey('user.id'), nullable=False)
     
-    solo_notes: Mapped[List["Solo_Note"]] = relationship("Solo_Note", back_populates='solo_session_id', cascade="all, delete-orphan")
-    solo_quotes: Mapped[List["Solo_Note"]] = relationship("Solo_Quote", back_populates='solo_session_id', cascade="all, delete-orphan")
-
+    solo_notes: Mapped[List["Solo_Note"]] = relationship("Solo_Note", back_populates='solo_session', cascade="all, delete-orphan")
+    solo_quotes: Mapped[List["Solo_Note"]] = relationship("Solo_Quote", back_populates='solo_session', cascade="all, delete-orphan")
+    user: Mapped["User"] = relationship(
+        "User",
+        back_populates="solo_sessions"
+    )

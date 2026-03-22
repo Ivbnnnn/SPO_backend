@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response, Request
 from fastapi import Depends
 import minio_api 
+import routers
 from fastapi import FastAPI, Depends, HTTPException, File, UploadFile, Form
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -11,7 +12,9 @@ from deps import get_session
 import asyncio
 from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
-
+from fastapi.security import OAuth2PasswordRequestForm
+from datetime import datetime, timedelta, timezone
+from jose import jwt, ExpiredSignatureError, JWTError
 
 app = FastAPI()
 
@@ -27,6 +30,9 @@ app = FastAPI()
 
 
 # app.include_router(minio_api.router)
+app.include_router(routers.auth_router)
+app.include_router(routers.book_router)
+app.include_router(routers.user_router)
 
 
 @app.on_event("startup")
@@ -50,9 +56,12 @@ async def on_startup():
             await asyncio.sleep(delay)
             delay = min(delay * 2, max_delay)
 
-@app.post('/add_user', response_model=schemas.UserCreate, tags=["User"])
-async def add_user(user:schemas.UserCreate,db:AsyncSession = Depends(get_session)):
-    return await crud.create_user(user, db)
+
+
+# @app.post('/add_user', response_model=schemas.UserCreate, tags=["User"])
+# async def add_user(user:schemas.UserCreate,db:AsyncSession = Depends(get_session)):
+#     return await crud.create_user(user, db)
+
 
 # @app.post('/add_item', tags=["Item"])
 # async def add_item( 
@@ -96,7 +105,7 @@ async def add_user(user:schemas.UserCreate,db:AsyncSession = Depends(get_session
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=5000)
+    uvicorn.run("main:app", host="0.0.0.0", port=5000, reload=True)
 
 
 

@@ -14,6 +14,15 @@ class Session(Base):
     is_active: Mapped[bool] = mapped_column (Boolean, nullable=False)
     user_id: Mapped[int] = mapped_column (ForeignKey('user.id'), nullable=False)
 
-    participants: Mapped[List["Session_Participant"]] = relationship("Session_Participant", back_populates='session_id', cascade="all, delete-orphan")
-    session_notes: Mapped[List["Session_Note"]] = relationship("Session_Note", back_populates='session_id', cascade="all, delete-orphan")
-    session_quotes: Mapped[List["Session_Quote"]] = relationship("Session_Quote", back_populates='session_id', cascade="all, delete-orphan")
+    participants: Mapped[List["Session_Participant"]] = relationship("Session_Participant", back_populates='session', cascade="all, delete-orphan")
+    session_notes: Mapped[List["Session_Note"]] = relationship(
+        "Session_Note",
+        back_populates='session',
+        cascade="all, delete-orphan"
+    )
+
+    session_quotes: Mapped[List["Session_Quote"]] = relationship(
+        "Session_Quote",
+        back_populates='session',
+        cascade="all, delete-orphan"
+    )

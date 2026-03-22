@@ -16,4 +16,12 @@ class Session_Note(Base):
     is_private:Mapped[bool] = mapped_column(Boolean, nullable=False)
     comment:Mapped[str] = mapped_column(Text, nullable=False)
     
-    answers: Mapped[List["Answer"]] = relationship("Answer", back_populates='note_id', cascade="all, delete-orphan")
+    answers: Mapped[List["Answer"]] = relationship("Answer", back_populates="note", cascade="all, delete-orphan")
+    participant: Mapped["Session_Participant"] = relationship(
+        "Session_Participant",
+        back_populates="session_notes"
+    )
+    session: Mapped["Session"] = relationship(
+        "Session",
+        back_populates="session_notes"
+    )

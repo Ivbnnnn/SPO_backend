@@ -41,7 +41,7 @@ async def proxy(object_name: str):
 
 
 
-async def upload_item_to_minio(
+async def upload_book_to_minio(
     file: UploadFile = File(...)
 ):
     # Прочитать файл
@@ -73,7 +73,7 @@ async def upload_item_to_minio(
 
     return file_url
 
-async def delete_item_from_minio(
+async def delete_book_from_minio(
         file_name:str
 ):
     try:

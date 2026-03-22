@@ -13,4 +13,7 @@ class Session_Quote(Base):
     color:Mapped[str] = mapped_column(String(50), nullable=False)
     session_id: Mapped[bool] = mapped_column (ForeignKey('session.id'), nullable=False)
     
-    
+    session: Mapped["Session"] = relationship(
+        "Session",
+        back_populates="session_quotes"
+    )
