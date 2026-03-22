@@ -7,7 +7,7 @@ from typing import Optional, List
 
 
 class Session_Quote(Base):
-    __tablename__ = "session_quotes"
+    __tablename__ = "session_quote"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     selected_text:Mapped[str] = mapped_column(Text, nullable=False)
     color:Mapped[str] = mapped_column(String(50), nullable=False)

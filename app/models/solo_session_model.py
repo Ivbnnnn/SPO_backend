@@ -7,7 +7,7 @@ from .solo_note_model import Solo_Note
 from .solo_quote_model import Solo_Quote
 
 class Solo_Session(Base):
-    __tablename__ = "solo_sessions"
+    __tablename__ = "solo_session"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     book_id: Mapped[int] = mapped_column(ForeignKey('books.id'),nullable=False)
     last_position: Mapped[int] = mapped_column(Integer,nullable=False)

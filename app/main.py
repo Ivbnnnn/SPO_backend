@@ -50,9 +50,9 @@ async def on_startup():
             await asyncio.sleep(delay)
             delay = min(delay * 2, max_delay)
 
-# @app.post('/add_user', response_model=schemas.UserCreate, tags=["User"])
-# async def add_user(user:schemas.UserCreate,db:AsyncSession = Depends(get_session)):
-#     return await crud.create_user(user, db)
+@app.post('/add_user', response_model=schemas.UserCreate, tags=["User"])
+async def add_user(user:schemas.UserCreate,db:AsyncSession = Depends(get_session)):
+    return await crud.create_user(user, db)
 
 # @app.post('/add_item', tags=["Item"])
 # async def add_item( 

@@ -5,7 +5,7 @@ from database import Base
 from typing import Optional, List
 
 class Book(Base):
-    __tablename__ = "books"
+    __tablename__ = "book"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
     title: Mapped[str] = mapped_column (String(50), nullable=False)

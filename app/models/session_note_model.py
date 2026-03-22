@@ -7,7 +7,7 @@ from .answer_model import Answer
 
 
 class Session_Note(Base):
-    __tablename__ = "session_notes"
+    __tablename__ = "session_note"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     selected_text:Mapped[str] = mapped_column(Text, nullable=False)
     color:Mapped[str] = mapped_column(String(50), nullable=False)

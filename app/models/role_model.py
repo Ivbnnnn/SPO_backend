@@ -6,7 +6,7 @@ from typing import Optional, List
 from .session_participant_model import Session_Participant
 
 class Role(Base):
-    __tablename__ = "roles"
+    __tablename__ = "role"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column (String(50), nullable=False, unique=True)
 

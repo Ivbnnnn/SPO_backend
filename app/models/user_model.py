@@ -8,7 +8,7 @@ from .session_participant_model import Session_Participant
 from .solo_session_model import Solo_Session
 from .session_note_model import Session_Note
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "user"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column (String(50), nullable=False)
     last_name: Mapped[str] = mapped_column (String(50), nullable=False)
@@ -19,7 +19,6 @@ class User(Base):
 
 
     books: Mapped[List["Book"]] = relationship ("Book", back_populates="user_id", cascade="all, delete-orphan")
-    # sessions: Mapped[List["Session"]] = relationship ("Session", back_populates="user_id", cascade="all, delete-orphan")
     solo_sessions: Mapped[List["Solo_Session"]] = relationship ("Solo_Session", back_populates="user_id", cascade="all, delete-orphan")
     session_participant: Mapped[List["Session_Participant"]] = relationship("Session_Participant", back_populates='user_id', cascade="all, delete-orphan")
     

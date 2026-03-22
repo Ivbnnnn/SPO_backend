@@ -7,7 +7,7 @@ from .session_participant_model import Session_Participant
 from .session_note_model import Session_Note
 from .session_quote_model import Session_Quote
 class Session(Base):
-    __tablename__ = "sessions"
+    __tablename__ = "session"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column (String(50), nullable=False)
     book_id: Mapped[int] = mapped_column (ForeignKey('books.id'), nullable=False)

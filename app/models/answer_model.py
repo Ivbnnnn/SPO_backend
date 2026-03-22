@@ -8,7 +8,7 @@ from .session_participant_model import Session_Participant
 
 
 class Answer(Base):
-    __tablename__ = "answers"
+    __tablename__ = "answer"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     content: Mapped[str] = mapped_column (Text, nullable=False)
     participant_id: Mapped[int] = mapped_column(ForeignKey("session_participants.id"), nullable=False)

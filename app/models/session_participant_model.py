@@ -7,7 +7,7 @@ from .answer_model import Answer
 from .session_note_model import Session_Note
  
 class Session_Participant(Base):
-    __tablename__ = "session_participants"
+    __tablename__ = "session_participant"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     session_id: Mapped[int] =mapped_column (ForeignKey('sessions.id'), nullable=False)
     user_id: Mapped[int] = mapped_column (ForeignKey('users.id'), nullable=False)
