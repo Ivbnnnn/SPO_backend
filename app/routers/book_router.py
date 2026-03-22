@@ -3,12 +3,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import crud
 import schemas
 from deps import get_session
+from .auth_router import get_current_user
+
+book_router = APIRouter(prefix="/book", tags=["book"], dependencies=[Depends(get_current_user)] )
 
 
-book_router = APIRouter(prefix="/book", tags=["book"])
-
-
-@book_router.post('/add', response_model=schemas.BookRead)
+@book_router.post('/add')
 async def add_book(
     title:str = Form(...),
     author:str = Form(...),

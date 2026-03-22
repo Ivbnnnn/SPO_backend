@@ -20,3 +20,5 @@ PyJWT
 python-jose[cryptography]==3.3.0
 dotenv
 pydantic[email]
+bs4
+ebooklib

@@ -122,7 +122,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
             detail="Некорректный токен",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    user = await get_user_by_id(db, int(user_id))
+    user = await get_user_by_id(int(user_id),db )
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -185,7 +185,7 @@ async def signup(
     user: schemas.UserCreate,
     db: AsyncSession = Depends(get_session),
 ):
-    existing_user = await get_user_by_username(db, user.name)
+    existing_user = await get_user_by_username(user.name,db )
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

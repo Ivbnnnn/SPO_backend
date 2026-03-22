@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, Depends, Form, File, UploadFile
 from deps import get_session
-from minio_api import upload_book_to_minio, delete_book_from_minio
+from minio_api import upload_cover_to_minio, delete_book_from_minio, upload_book_to_minio
 from typing import Optional
 # book
  
@@ -23,8 +23,14 @@ async def create_book(
     user = await db.get(models.User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    content_path =await upload_book_to_minio(content) 
-    cover_img =await upload_book_to_minio(book_cover) 
+    try:
+        content_path =await upload_book_to_minio(content) 
+    except:
+        raise HTTPException(status_code=400, detail="failed to upload book content")
+    try:
+        cover_img =await upload_cover_to_minio(book_cover) 
+    except:
+        raise HTTPException(status_code=400, detail="failed to upload book cover")
     db_book = models.Book(title=title, author=author, user_id=user_id, content_path=content_path, cover_img=cover_img)
     db.add(db_book)
     try:
@@ -32,7 +38,7 @@ async def create_book(
         await db.refresh(db_book)        
     except:
         await db.rollback()
-        raise HTTPException(status_code=400, detail="Error")
+        raise HTTPException(status_code=400, detail="Error: book is already created")
     return db_book
 
 #bookview

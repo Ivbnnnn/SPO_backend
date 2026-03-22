@@ -16,3 +16,6 @@ class BookRead(BookCreate):
     content_path:str
     model_config = ConfigDict(from_attributes=True)
 
+class UploadBookResponse(BaseModel):
+    file_name: str
+    pages: int
