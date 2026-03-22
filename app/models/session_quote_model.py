@@ -11,6 +11,6 @@ class Session_Quote(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     selected_text:Mapped[str] = mapped_column(Text, nullable=False)
     color:Mapped[str] = mapped_column(String(50), nullable=False)
-    session_id: Mapped[bool] = mapped_column (ForeignKey('sessions.id'), nullable=False)
+    session_id: Mapped[bool] = mapped_column (ForeignKey('session.id'), nullable=False)
     
     

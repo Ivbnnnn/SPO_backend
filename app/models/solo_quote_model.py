@@ -9,4 +9,4 @@ class Solo_Quote(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     selected_text:Mapped[str] = mapped_column(Text, nullable=False)
     color:Mapped[str] = mapped_column(String(50), nullable=False)
-    solo_session_id:Mapped[str] = mapped_column(ForeignKey('solo_sessions.id'), nullable=False)
+    solo_session_id:Mapped[str] = mapped_column(ForeignKey('solo_session.id'), nullable=False)

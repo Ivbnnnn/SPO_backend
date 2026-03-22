@@ -10,9 +10,9 @@ class Session(Base):
     __tablename__ = "session"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column (String(50), nullable=False)
-    book_id: Mapped[int] = mapped_column (ForeignKey('books.id'), nullable=False)
+    book_id: Mapped[int] = mapped_column (ForeignKey('book.id'), nullable=False)
     is_active: Mapped[bool] = mapped_column (Boolean, nullable=False)
-    user_id: Mapped[int] = mapped_column (ForeignKey('users.id'), nullable=False)
+    user_id: Mapped[int] = mapped_column (ForeignKey('user.id'), nullable=False)
 
     participants: Mapped[List["Session_Participant"]] = relationship("Session_Participant", back_populates='session_id', cascade="all, delete-orphan")
     session_notes: Mapped[List["Session_Note"]] = relationship("Session_Note", back_populates='session_id', cascade="all, delete-orphan")

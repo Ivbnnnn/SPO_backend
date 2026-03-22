@@ -11,7 +11,7 @@ from datetime import timezone, datetime
 class RefreshToken(Base):
     __tablename__ = "refresh_token"
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.user_id"), nullable=False)
     jti_hash: Mapped[str] = mapped_column(
         String(64), unique=True, index=True, nullable=False
     )
