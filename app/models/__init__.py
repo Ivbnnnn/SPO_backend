@@ -13,17 +13,3 @@ from .refresh_token_model import RefreshToken
 
 
 
-__all__ = [
-    "User",
-    "Book",
-    "Answer",
-    "Role",
-    "Session",
-    "Session_Note",
-    "Session_Participant",
-    "Session_Quote",
-    "Solo_Note",
-    "Solo_Quote",
-    "Solo_Session",
-    "RefreshToken"
-]

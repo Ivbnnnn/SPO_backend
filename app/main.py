@@ -36,6 +36,8 @@ app.include_router(routers.auth_router)
 app.include_router(routers.book_router)
 app.include_router(routers.user_router)
 app.include_router(routers.session_router)
+app.include_router(routers.session_note_router)
+app.include_router(routers.session_quote_router)
 
 
 @app.on_event("startup")

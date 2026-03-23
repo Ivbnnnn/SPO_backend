@@ -320,8 +320,8 @@ async def refresh_token(
     }
 
 
-# 3) Проверка токена для авторизации
-@auth_router.get("/verify")
+
+@auth_router.post("/verify")
 async def verify_current_user(current_user=Depends(get_current_user)):
     return {
         "ok": True,

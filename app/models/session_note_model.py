@@ -6,13 +6,13 @@ from typing import Optional, List
 from .answer_model import Answer
 
 
-class Session_Note(Base):
+class Session_Note(Base): 
     __tablename__ = "session_note"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     selected_text:Mapped[str] = mapped_column(Text, nullable=False)
     color:Mapped[str] = mapped_column(String(50), nullable=False)
-    user_id:Mapped[str] = mapped_column(ForeignKey('session_participant.id'), nullable=False)
-    session_id:Mapped[str] = mapped_column(ForeignKey('session.id'), nullable=False)
+    participant_id:Mapped[int] = mapped_column(ForeignKey('session_participant.id'), nullable=False, index=True)
+    session_id:Mapped[int] = mapped_column(ForeignKey('session.id'), nullable=False, index=True)
     is_private:Mapped[bool] = mapped_column(Boolean, nullable=False)
     comment:Mapped[str] = mapped_column(Text, nullable=False)
     start_index:Mapped[int] = mapped_column(Integer, nullable=False, default=0)
