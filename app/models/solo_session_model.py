@@ -10,7 +10,7 @@ class Solo_Session(Base):
     __tablename__ = "solo_session"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     book_id: Mapped[int] = mapped_column(ForeignKey('book.id'),nullable=False)
-    last_position: Mapped[int] = mapped_column(Integer,nullable=False)
+    last_position: Mapped[int] = mapped_column(Integer,nullable=True)
     user_id: Mapped[int] = mapped_column (ForeignKey('user.id'), nullable=False)
     
     solo_notes: Mapped[List["Solo_Note"]] = relationship("Solo_Note", back_populates='solo_session', cascade="all, delete-orphan")
@@ -18,4 +18,8 @@ class Solo_Session(Base):
     user: Mapped["User"] = relationship(
         "User",
         back_populates="solo_sessions"
+    )
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'book_id', name='uq_user_book'),
     )

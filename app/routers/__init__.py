@@ -4,3 +4,7 @@ from .user_router import user_router
 from .session_router import session_router
 from .session_note_router import session_note_router
 from .sesssion_quote_router import session_quote_router
+from .solo_session_router import solo_session_router
+from .answer_router import answer_router
+from .solo_session_note_router import solo_session_note_router
+from .solo_session_quote_router import solo_session_quote_router

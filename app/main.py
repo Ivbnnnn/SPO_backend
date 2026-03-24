@@ -38,6 +38,11 @@ app.include_router(routers.user_router)
 app.include_router(routers.session_router)
 app.include_router(routers.session_note_router)
 app.include_router(routers.session_quote_router)
+app.include_router(routers.answer_router)
+app.include_router(routers.solo_session_router)
+app.include_router(routers.solo_session_note_router)
+app.include_router(routers.solo_session_quote_router)
+
 
 
 @app.on_event("startup")
