@@ -10,7 +10,7 @@ solo_session_note_router = APIRouter(prefix="/solo_session/note", tags=["solo_se
 
 @solo_session_note_router.post('/create')
 async def add_session_note(solo_session_quote:schemas.SoloSessionQuoteCreate,db:AsyncSession = Depends(get_session)):
-    return await crud.create_solo_session_quote(solo_session_quote, db)
+    return await crud.create_solo_session_note(solo_session_quote, db)
 
 
 @solo_session_note_router.get('/')
@@ -29,5 +29,5 @@ async def get_session_notes(
             ]
         )
     else:
-        return await crud.get_solo_session_quotes_by_solo_session_id(solo_session_id, db)
+        return await crud.get_solo_session_notes_by_solo_session_id(solo_session_id, db)
   

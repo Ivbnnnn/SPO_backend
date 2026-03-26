@@ -42,7 +42,7 @@ app.include_router(routers.answer_router)
 app.include_router(routers.solo_session_router)
 app.include_router(routers.solo_session_note_router)
 app.include_router(routers.solo_session_quote_router)
-
+app.include_router(routers.ws_router)
 
 
 @app.on_event("startup")
@@ -74,7 +74,7 @@ async def on_startup():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=5000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=5000, reload=True, workers=1)
 
 
 

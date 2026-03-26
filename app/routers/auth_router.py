@@ -107,7 +107,7 @@ async def get_refresh_record_by_jti_hash(jti_hash_value: str,db: AsyncSession  )
 
 
 #user heplers
-async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_session),):
+async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_session),) -> models.User:
     payload = decode_token(token)
     if payload.get("type") != "access":
         raise HTTPException(

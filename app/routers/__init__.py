@@ -8,3 +8,4 @@ from .solo_session_router import solo_session_router
 from .answer_router import answer_router
 from .solo_session_note_router import solo_session_note_router
 from .solo_session_quote_router import solo_session_quote_router
+from .ws_router import ws_router

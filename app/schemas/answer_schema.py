@@ -2,11 +2,20 @@ from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 
 class AnswerBase(BaseModel):
-    content: str
-
-class AnswerCreate(AnswerBase):
     participant_id: int
     note_id:int    
+
+class AnswerCreate(AnswerBase):
+    content: str
+ 
+class AnswerUpdate(AnswerBase):
+    id:int
+    content: str
+    model_config = ConfigDict(from_attributes=True)
+ 
+class AnswerDelete(AnswerBase):
+    id:int 
+    model_config = ConfigDict(from_attributes=True)
  
 class AnswerRead(AnswerCreate):
     id: int 
