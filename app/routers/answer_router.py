@@ -15,11 +15,22 @@ async def add_session_answer(
         db:AsyncSession = Depends(get_session)):
     return await crud.create_answer(answer, request.state.user, db)
 
-
-
 @answer_router.get('/')
 async def get_session_answers(
         note_id:int = Query(...),
         db:AsyncSession = Depends(get_session)):
     return await crud.get_answers_by_note_id(note_id, db)
-    
+
+@answer_router.patch('/update')
+async def add_session_answer(
+        answer: schemas.AnswerUpdate,
+        request:Request,
+        db:AsyncSession = Depends(get_session)):
+    return await crud.update_session_answer(answer, request.state.user, db)
+
+@answer_router.post('/delete')
+async def add_session_answer(
+        answer:schemas.AnswerDelete,
+        request:Request,
+        db:AsyncSession = Depends(get_session)):
+    return await crud.delete_session_answer(answer, request.state.user, db)

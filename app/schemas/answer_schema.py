@@ -11,11 +11,13 @@ class AnswerCreate(AnswerBase):
  
 class AnswerUpdate(AnswerBase):
     id:int
+    session_id:int
     content: str
     model_config = ConfigDict(from_attributes=True)
  
 class AnswerDelete(AnswerBase):
     id:int 
+    session_id:int
     model_config = ConfigDict(from_attributes=True)
  
 class AnswerRead(AnswerCreate):

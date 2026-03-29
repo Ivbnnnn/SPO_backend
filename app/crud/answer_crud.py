@@ -41,7 +41,14 @@ async def create_answer(
 
 async def update_session_answer(
         answer: schemas.AnswerUpdate,
+        user:models.User,
         db: AsyncSession = Depends(get_session)):
+    
+    q_check = select(models.Session_Participant).where(models.Session_Participant.user_id == user.id, models.Session_Participant.session_id == answer.session_id)
+    check_result = (await db.execute(q_check)).scalar_one_or_none()
+    if check_result is None:
+        raise HTTPException(status_code=403, detail="must be auth-d")
+
     update_data = answer.model_dump(exclude_unset=True, exclude={"id"})
     
     if not update_data:
@@ -77,8 +84,15 @@ async def update_session_answer(
 
 async def delete_session_answer(
     answer: schemas.AnswerDelete,  
+    user:models.User,
     db: AsyncSession = Depends(get_session)
 ):
+    q_check = select(models.Session_Participant).where(models.Session_Participant.user_id == user.id, models.Session_Participant.session_id == answer.session_id)
+    check_result = (await db.execute(q_check)).scalar_one_or_none()
+    if check_result is None:
+        raise HTTPException(status_code=403, detail="must be auth-d")
+
+
     stmt_select = select(models.Answer).where(models.Answer.id == answer.id)
     db_answer = (await db.execute(stmt_select)).scalars().first()
     
