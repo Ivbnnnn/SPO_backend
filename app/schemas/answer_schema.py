@@ -7,6 +7,7 @@ class AnswerBase(BaseModel):
 
 class AnswerCreate(AnswerBase):
     content: str
+    session_id:int
  
 class AnswerUpdate(AnswerBase):
     id:int

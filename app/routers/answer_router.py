@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, UploadFile, Form, Query
+from fastapi import APIRouter, Depends, File, UploadFile, Form, Query,Request
 from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 import crud
@@ -9,8 +9,11 @@ from .auth_router import get_current_user
 answer_router = APIRouter(prefix="/answer", tags=["answer"] )
 
 @answer_router.post('/create')
-async def add_session_answer(answer:schemas.AnswerCreate,db:AsyncSession = Depends(get_session)):
-    return await crud.create_answer(answer, db)
+async def add_session_answer(
+        answer:schemas.AnswerCreate,
+        request:Request,
+        db:AsyncSession = Depends(get_session)):
+    return await crud.create_answer(answer, request.state.user, db)
 
 
 

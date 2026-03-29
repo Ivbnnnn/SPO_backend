@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
+from sqlalchemy.orm import selectinload
 import models, schemas
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
@@ -8,9 +9,25 @@ from deps import get_session
 
 
 async def create_answer( 
-    answer:schemas.AnswerCreate,
-    db:AsyncSession = Depends(get_session)
-    ):
+        answer:schemas.AnswerCreate,
+        user:models.User,
+        db:AsyncSession = Depends(get_session)
+        ):
+    
+    q_check = (
+        select(models.Session)
+        .join(models.Session.participants)  
+        .where(
+            models.Session.id == answer.session_id,
+            models.Session.user_id == user.id, 
+            models.Session_Participant.id == answer.participant_id  
+        )
+    )
+    db_check = (await db.execute(q_check)).scalar_one_or_none()
+    if db_check is None:
+        raise HTTPException(status_code=403, detail="must be auth-d")
+    
+
     db_answer = models.Answer(
         **answer.model_dump()
     )
