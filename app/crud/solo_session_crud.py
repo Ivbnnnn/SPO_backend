@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 import models, schemas
 from sqlalchemy import select, func, cast, Float, insert
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, Depends, Query
@@ -11,17 +12,19 @@ import uuid
 
 # Session
 
-async def create_solo_session(session:schemas.SoloSessionCreate,db:AsyncSession = Depends(get_session)):
-    user = await db.get(models.User, session.user_id)
+async def create_solo_session(user:models.User, book_id:int,db:AsyncSession = Depends(get_session)):
+    user = await db.get(models.User, user.id)
     if not user:
-        return HTTPException(status_code=404, detail=f'user with id:{session.user_id} not found')
-    book = await db.get(models.Book, session.book_id)
+        raise HTTPException(status_code=404, detail=f'user with id:{user.id} not found')
+    # if user.id != session.user_id:
+    #     raise HTTPException(status_code=403, detail=f'Anouthorized')
+    book = await db.get(models.Book, book_id)
     if not book:
-        return HTTPException(status_code=404, detail=f'book with id:{session.book_id} not found')
+        raise HTTPException(status_code=404, detail=f'book with id:{book_id} not found')
 
     db_session = models.Solo_Session(        
-        book_id = session.book_id,
-        user_id= session.user_id
+        book_id = book_id,
+        user_id= user.id
     )
     db.add(db_session)
     try:
@@ -29,23 +32,23 @@ async def create_solo_session(session:schemas.SoloSessionCreate,db:AsyncSession 
         await db.refresh(db_session)
     except:
         await db.rollback()
-        return HTTPException(status_code=400, detail="failed to create session")
+        raise HTTPException(status_code=400, detail="failed to create session")
     return db_session
 
 async def get_solo_session(
-        user_id:int = Query(None),
+        user_id:int,
         book_id:int = Query(None),
         db:AsyncSession = Depends(get_session)):
-    if user_id is None and book_id is None:
-        raise HTTPException(
-            status_code=400,
-            detail="Хотя бы один из query параметров не должен быть None"
-        )
-    elif user_id is not None and book_id is None:
+    if user_id is not None and book_id is None:
         q = select(models.Solo_Session).where(models.Solo_Session.user_id == user_id)
         result = (await db.execute(q)).scalars().all()
         return result
     elif user_id is not None and book_id is not None:
-        q = select(models.Solo_Session).where(models.Solo_Session.user_id == user_id).where(models.Solo_Session.book_id == book_id)
+        q = select(models.Solo_Session)\
+            .options(selectinload(models.Solo_Session.book))\
+            .where(
+                models.Solo_Session.user_id == user_id,
+                models.Solo_Session.book_id == book_id
+            )
         result = (await db.execute(q)).scalar_one_or_none()
         return result

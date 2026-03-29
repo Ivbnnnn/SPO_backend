@@ -6,7 +6,7 @@ import schemas
 from deps import get_session
 from .auth_router import get_current_user
 
-answer_router = APIRouter(prefix="/answer", tags=["answer"], dependencies=[Depends(get_current_user)] )
+answer_router = APIRouter(prefix="/answer", tags=["answer"] )
 
 @answer_router.post('/create')
 async def add_session_answer(answer:schemas.AnswerCreate,db:AsyncSession = Depends(get_session)):

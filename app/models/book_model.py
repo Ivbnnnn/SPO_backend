@@ -16,3 +16,4 @@ class Book(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
     
     user: Mapped["User"] = relationship("User", back_populates="books")
+    solo_session: Mapped["Solo_Session"] = relationship("Solo_Session", back_populates="book")

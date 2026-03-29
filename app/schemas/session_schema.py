@@ -7,7 +7,7 @@ class SessionBase(BaseModel):
     book_id: int
 
 class SessionCreate(SessionBase):
-    user_id: int
+    pass
 
 
 class SessionUpdate(SessionCreate):

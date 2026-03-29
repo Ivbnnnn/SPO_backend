@@ -19,7 +19,7 @@ class Solo_Session(Base):
         "User",
         back_populates="solo_sessions"
     )
-
+    book: Mapped ["Book"] = relationship("Book", back_populates="solo_session")
     __table_args__ = (
         UniqueConstraint('user_id', 'book_id', name='uq_user_book'),
     )

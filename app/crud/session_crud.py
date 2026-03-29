@@ -11,10 +11,10 @@ import uuid
 
 # Session
 
-async def create_session(session:schemas.SessionCreate,db:AsyncSession = Depends(get_session)):
-    user = await db.get(models.User, session.user_id)
+async def create_session(session:schemas.SessionCreate,user_id:int,db:AsyncSession = Depends(get_session)):
+    user = await db.get(models.User, user_id)
     if not user:
-        return HTTPException(status_code=404, detail=f'user with id:{session.user_id} not found')
+        return HTTPException(status_code=404, detail=f'user with id:{user_id} not found')
     book = await db.get(models.Book, session.book_id)
     if not book:
         return HTTPException(status_code=404, detail=f'book with id:{session.book_id} not found')
@@ -22,7 +22,7 @@ async def create_session(session:schemas.SessionCreate,db:AsyncSession = Depends
     db_session = models.Session(
         name=session.name,
         book_id = session.book_id,
-        user_id= session.user_id,
+        user_id= user_id,
         link=uuid.uuid4().hex 
     )
     db.add(db_session)

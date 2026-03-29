@@ -9,8 +9,12 @@ from .auth_router import get_current_user
 session_note_router = APIRouter(prefix="/session/note", tags=["session_note"], dependencies=[Depends(get_current_user)] )
 
 @session_note_router.post('/create')
-async def add_session_note(session_note:schemas.SessionNoteCreate,db:AsyncSession = Depends(get_session)):
+async def add_session_note(
+        session_note:schemas.SessionNoteCreate,
+        db:AsyncSession = Depends(get_session)):
     return await crud.create_session_note(session_note, db)
+
+
 @session_note_router.get('/')
 async def get_session_notes(
         session_id:int | None = Query(default=None),

@@ -16,12 +16,12 @@ from fastapi.security import OAuth2PasswordRequestForm
 from datetime import datetime, timedelta, timezone
 from jose import jwt, ExpiredSignatureError, JWTError
 from startup_conf import fill_role_model
-
+from middleware import AuthMiddleware
 
 app = FastAPI()
 
 
-
+app.add_middleware(AuthMiddleware)
 # app.add_middleware(
 #     CORSMiddleware,
 #     allow_origins=["http://localhost:5173"],
