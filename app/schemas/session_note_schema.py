@@ -3,7 +3,6 @@ from typing import List, Optional
 
 class SessionNoteBase(BaseModel):
     session_id: int
-    participant_id: int 
 
 class SessionNoteCreate(SessionNoteBase):
     selected_text:str

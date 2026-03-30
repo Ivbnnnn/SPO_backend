@@ -102,14 +102,24 @@ class AnswerCreateResponse(BaseModel):
     action_type: Literal["create"]
     payload: schemas.AnswerRead
 
+class AnswerUpdateResponse(BaseModel):
+    action_type: Literal["update"]
+    payload: schemas.AnswerUpdateValidate
+
 class AnswerUpdateData(BaseModel):
     action_type: Literal["update"]
     payload: schemas.AnswerUpdate
 
 
+
+
 class AnswerDeleteData(BaseModel):
     action_type: Literal["delete"]
     payload: schemas.AnswerDelete
+
+class AnswerDeleteResponse(BaseModel):
+    action_type: Literal["delete"]
+    payload: schemas.AnswerDeleteValidate
 
 
 AnswerDataIn: TypeAlias = Annotated[
@@ -124,8 +134,8 @@ AnswerDataIn: TypeAlias = Annotated[
 AnswerDataOut: TypeAlias = Annotated[
     Union[
         AnswerCreateResponse,
-        AnswerUpdateData,
-        AnswerDeleteData
+        AnswerUpdateResponse,
+        AnswerDeleteResponse
     ],
     Field(discriminator="action_type"),
 ]

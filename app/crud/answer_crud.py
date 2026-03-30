@@ -10,26 +10,18 @@ from deps import get_session
 
 async def create_answer( 
         answer:schemas.AnswerCreate,
-        user:models.User,
+        user_id:int,
         db:AsyncSession = Depends(get_session)
         ):
-    
-    q_check = (
-        select(models.Session)
-        .join(models.Session.participants)  
-        .where(
-            models.Session.id == answer.session_id,
-            models.Session.user_id == user.id, 
-            models.Session_Participant.id == answer.participant_id  
-        )
-    )
-    db_check = (await db.execute(q_check)).scalar_one_or_none()
-    if db_check is None:
+    q_check = select(models.Session_Participant).where(models.Session_Participant.user_id == user_id, models.Session_Participant.session_id == answer.session_id)
+    participant = (await db.execute(q_check)).scalar_one_or_none()
+    if participant is None:
         raise HTTPException(status_code=403, detail="must be auth-d")
     
-
     db_answer = models.Answer(
-        **answer.model_dump()
+        content = answer.content,
+        note_id = answer.note_id,
+        participant_id = participant.id,        
     )
     db.add(db_answer)
     try:
@@ -41,12 +33,12 @@ async def create_answer(
 
 async def update_session_answer(
         answer: schemas.AnswerUpdate,
-        user:models.User,
+        user_id:int,
         db: AsyncSession = Depends(get_session)):
     
-    q_check = select(models.Session_Participant).where(models.Session_Participant.user_id == user.id, models.Session_Participant.session_id == answer.session_id)
-    check_result = (await db.execute(q_check)).scalar_one_or_none()
-    if check_result is None:
+    q_check = select(models.Session_Participant).where(models.Session_Participant.user_id == user_id, models.Session_Participant.session_id == answer.session_id)
+    participant = (await db.execute(q_check)).scalar_one_or_none()
+    if participant is None:
         raise HTTPException(status_code=403, detail="must be auth-d")
 
     update_data = answer.model_dump(exclude_unset=True, exclude={"id"})
@@ -57,7 +49,7 @@ async def update_session_answer(
     stmt_select = select(models.Answer).where(models.Answer.id == answer.id)
     db_answer = (await db.execute(stmt_select)).scalars().first()
 
-    if hasattr(answer, "participant_id") and db_answer.participant_id != answer.participant_id:
+    if db_answer.participant_id != participant.id:
         raise HTTPException(status_code=403, detail="You are not allowed to update this answer")
     
     if not db_answer:
@@ -66,7 +58,9 @@ async def update_session_answer(
     stmt_update = (
         update(models.Answer)
         .where(models.Answer.id == answer.id)
-        .values(**update_data)
+        .values(content = answer.content,
+        note_id = answer.note_id,
+        participant_id = participant.id)
         .execution_options(synchronize_session="fetch")
     )
     
@@ -84,12 +78,12 @@ async def update_session_answer(
 
 async def delete_session_answer(
     answer: schemas.AnswerDelete,  
-    user:models.User,
+    user_id:int,
     db: AsyncSession = Depends(get_session)
 ):
-    q_check = select(models.Session_Participant).where(models.Session_Participant.user_id == user.id, models.Session_Participant.session_id == answer.session_id)
-    check_result = (await db.execute(q_check)).scalar_one_or_none()
-    if check_result is None:
+    q_check = select(models.Session_Participant).where(models.Session_Participant.user_id == user_id, models.Session_Participant.session_id == answer.session_id)
+    participant = (await db.execute(q_check)).scalar_one_or_none()
+    if participant is None:
         raise HTTPException(status_code=403, detail="must be auth-d")
 
 
@@ -99,7 +93,7 @@ async def delete_session_answer(
     if not db_answer:
         raise HTTPException(status_code=404, detail=f"Answer with id={answer.id} not found")
         
-    if hasattr(answer, "participant_id") and db_answer.participant_id != answer.participant_id:
+    if db_answer.participant_id != participant.id:
         raise HTTPException(status_code=403, detail="You are not allowed to delete this answer")
     
     stmt_delete = delete(models.Answer).where(models.Answer.id == answer.id)
@@ -117,8 +111,14 @@ async def delete_session_answer(
 
 async def get_answers_by_note_id( 
     note_id:int,
+    user_id:int,
     db:AsyncSession = Depends(get_session)
     ):
+    session_id = select(models.Session_Note.session_id).where(models.Session_Note.id == note_id).scalar_subquery()
+    q_check = select(models.Session_Participant).where(models.Session_Participant.user_id == user_id, models.Session_Participant.session_id == session_id)
+    participant = (await db.execute(q_check)).scalar_one_or_none()
+    if participant is None:
+        raise HTTPException(status_code=403, detail="must be auth-d")
     q = select(models.Answer).where(models.Answer.note_id == note_id)
     result = (await db.execute(q)).scalars().all()
     return result

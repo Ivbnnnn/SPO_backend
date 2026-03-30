@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, UploadFile, Form
+from fastapi import APIRouter, Depends, File, Request, Form
 from sqlalchemy.ext.asyncio import AsyncSession
 import crud
 import schemas, models
@@ -17,7 +17,7 @@ async def add_session(
 
     return db_session
 @session_router.get('/get/participants')
-async def add_session(
+async def get_session_participants(
         session_id:int,
         user:models.User = Depends(get_current_user),
         db:AsyncSession = Depends(get_session)):
@@ -27,12 +27,12 @@ async def add_session(
 
 
 @session_router.post('/{link}', summary="Переход по ссылке добавляет участника в сессию")
-async def add_user(
+async def join_by_link(
         link:str,
-        participant:schemas.ParticipantCreate,
-        user:models.User = Depends(get_current_user),
+        request:Request,
+        session_id:int,
         db:AsyncSession = Depends(get_session)):
     session = await crud.get_session_by_link(link, db)
-    await crud.join_participant(participant=participant, db=db)
+    await crud.join_participant(request.state.user.id, session_id, db=db)
 
     return session

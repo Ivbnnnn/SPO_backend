@@ -23,16 +23,15 @@ async def websocket_endpoint(
     async with AsyncSessionLocal() as db:
         user = await get_current_user(token, db)
 
-        stmt = select(
-            exists().where(
+        stmt = select(models.Session_Participant).where(
                 models.Session_Participant.user_id == user.id,
                 models.Session_Participant.session_id == session_id
             )
-        )
+        
 
-        is_member = await db.scalar(stmt)
+        participant = (await db.execute(stmt)).scalar_one_or_none()
 
-        if not is_member:
+        if participant is None:
             await websocket.close()
             return
     await manager.connect(session_id=session_id, websocket=websocket)
@@ -47,7 +46,7 @@ async def websocket_endpoint(
             if msg.type == "note" and msg.data.action_type == 'create':
                 async with AsyncSessionLocal() as db:
                     try:                        
-                        db_note = await crud.create_session_note(note = msg.data.payload, db=db)
+                        db_note = await crud.create_session_note(user_id = user.id, note = msg.data.payload, db=db)
                         note_read = schemas.SessionNoteRead.model_validate(db_note)
 
                         ws_message = schemas.NoteMessageOut(
@@ -67,7 +66,7 @@ async def websocket_endpoint(
             if msg.type == "note" and msg.data.action_type == 'update':
                 async with AsyncSessionLocal() as db:
                     try:                        
-                        db_note = await crud.update_session_note(note = msg.data.payload, db=db)
+                        db_note = await crud.update_session_note(user_id = user.id,note = msg.data.payload, db=db)
                         note_read = schemas.SessionNoteUpdate.model_validate(db_note)
 
                         ws_message = schemas.NoteMessageOut(
@@ -87,7 +86,7 @@ async def websocket_endpoint(
             if msg.type == "note" and msg.data.action_type == 'delete':
                 async with AsyncSessionLocal() as db:
                     try:                        
-                        db_note = await crud.delete_session_note(note = msg.data.payload, db=db)
+                        db_note = await crud.delete_session_note(user_id = user.id,note = msg.data.payload, db=db)
                         note_read = schemas.SessionNoteDelete.model_validate(db_note)
 
                         ws_message = schemas.NoteMessageOut(
@@ -110,7 +109,7 @@ async def websocket_endpoint(
             if msg.type == "quote" and msg.data.action_type == 'create':
                 async with AsyncSessionLocal() as db:
                     try:                        
-                        db_quote = await crud.create_session_quote(quote = msg.data.payload, db=db)
+                        db_quote = await crud.create_session_quote(user_id = user.id,quote = msg.data.payload, db=db)
                         quote_read = schemas.SessionQuoteRead.model_validate(db_quote)
 
                         ws_message = schemas.QuoteMessageOut(
@@ -130,7 +129,7 @@ async def websocket_endpoint(
             if msg.type == "quote" and msg.data.action_type == 'update':
                 async with AsyncSessionLocal() as db:
                     try:                        
-                        db_quote = await crud.update_session_quote(quote = msg.data.payload, db=db)
+                        db_quote = await crud.update_session_quote(user_id = user.id,quote = msg.data.payload, db=db)
                         quote_read = schemas.SessionQuoteUpdate.model_validate(db_quote)
 
                         ws_message = schemas.QuoteMessageOut(
@@ -150,7 +149,7 @@ async def websocket_endpoint(
             if msg.type == "quote" and msg.data.action_type == 'delete':
                 async with AsyncSessionLocal() as db:
                     try:                        
-                        db_quote = await crud.delete_session_quote(quote = msg.data.payload, db=db)
+                        db_quote = await crud.delete_session_quote(user_id = user.id,quote = msg.data.payload, db=db)
                         quote_read = schemas.SessionQuoteDelete.model_validate(db_quote)
 
                         ws_message = schemas.QuoteMessageOut(
@@ -172,7 +171,7 @@ async def websocket_endpoint(
             if msg.type == "answer" and msg.data.action_type == 'create':
                 async with AsyncSessionLocal() as db:
                     try:                        
-                        db_answer = await crud.create_answer(answer = msg.data.payload, db=db)
+                        db_answer = await crud.create_answer(user_id = user.id, answer = msg.data.payload, db=db)
                         answer_read = schemas.AnswerRead.model_validate(db_answer)
 
                         ws_message = schemas.AnswerMessageOut(
@@ -192,12 +191,12 @@ async def websocket_endpoint(
             if msg.type == "answer" and msg.data.action_type == 'update':
                 async with AsyncSessionLocal() as db:
                     try:                        
-                        db_answer = await crud.update_session_answer(answer = msg.data.payload, db=db)
-                        answer_read = schemas.AnswerUpdate.model_validate(db_answer)
+                        db_answer = await crud.update_session_answer(user_id = user.id,answer = msg.data.payload, db=db)
+                        answer_read = schemas.AnswerUpdateValidate.model_validate(db_answer)
 
                         ws_message = schemas.AnswerMessageOut(
                             type="answer",
-                            data=schemas.AnswerUpdateData(
+                            data=schemas.AnswerUpdateResponse(
                                 action_type="update",
                                 payload=answer_read 
                             )
@@ -212,12 +211,12 @@ async def websocket_endpoint(
             if msg.type == "answer" and msg.data.action_type == 'delete':
                 async with AsyncSessionLocal() as db:
                     try:                        
-                        db_answer = await crud.delete_session_answer(answer = msg.data.payload, db=db)
-                        answer_read = schemas.AnswerDelete.model_validate(db_answer)
+                        db_answer = await crud.delete_session_answer(user_id = user.id,answer = msg.data.payload, db=db)
+                        answer_read = schemas.AnswerDeleteValidate.model_validate(db_answer)
 
                         ws_message = schemas.AnswerMessageOut(
                             type="answer",
-                            data=schemas.AnswerDeleteData(
+                            data=schemas.AnswerDeleteResponse(
                                 action_type="delete",
                                 payload=answer_read 
                             )

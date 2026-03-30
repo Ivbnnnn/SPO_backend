@@ -32,21 +32,35 @@ async def create_participant(
     return db_participant
 
 async def join_participant( 
-    participant: schemas.ParticipantCreate,
+    user_id:int,
+    session_id: int,
     db:AsyncSession = Depends(get_session)
     ):
-    user = await db.get(models.User, participant.user_id)
+    user = await db.get(models.User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    session = await db.get(models.Session, participant.session_id)
+    session = await db.get(models.Session, session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
     
-    db_participant = models.Session_Participant(user_id = participant.user_id, session_id = participant.session_id, role_id = 1)
+    db_participant = models.Session_Participant(user_id = user_id, session_id = session_id, role_id = 1)
     db.add(db_participant)
     try:
         await db.commit()
         await db.refresh(db_participant)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"{e}")
+    return db_participant
+
+async def get_participant_by_user_session_id( 
+    user_id:int,
+    session_id: int,
+    db:AsyncSession = Depends(get_session)
+    ):
+    if not session_id:
+        raise HTTPException(status_code=404, detail="Session_id must be provided")
+    q_find = select(models.Session_Participant).where(models.Session_Participant.session_id == session_id, models.Session_Participant.user_id == user_id)
+    db_participant = (await db.execute(q_find)).scalar_one_or_none()
+    if not db_participant:
+        raise HTTPException(status_code=400, detail="You are going outer scope or you are not registered to this session")
     return db_participant

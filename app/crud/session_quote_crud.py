@@ -9,9 +9,18 @@ from deps import get_session
 
 
 
-async def create_session_quote(quote:schemas.SessionQuoteCreate,db:AsyncSession = Depends(get_session)):
+async def create_session_quote(
+        user_id:int,
+        quote:schemas.SessionQuoteCreate,
+        db:AsyncSession = Depends(get_session)):
+    q_check = select(models.Session_Participant).where(models.Session_Participant.user_id == user_id, models.Session_Participant.session_id == quote.session_id)
+    participant = (await db.execute(q_check)).scalar_one_or_none()
+    if participant is None:
+        raise HTTPException(status_code=403, detail="must be auth-d")
+
     db_quote = models.Session_Quote(
-        **quote.model_dump()
+        **quote.model_dump(),
+        participant_id = participant.id
     )
     db.add(db_quote)
     try:
@@ -21,7 +30,15 @@ async def create_session_quote(quote:schemas.SessionQuoteCreate,db:AsyncSession 
         raise HTTPException(status_code=400, detail=f'failed to create quote {e}')
     return db_quote
 
-async def update_session_quote(quote: schemas.SessionQuoteUpdate, db: AsyncSession = Depends(get_session)):
+async def update_session_quote(
+        user_id:int,
+        quote: schemas.SessionQuoteUpdate, db: AsyncSession = Depends(get_session)):
+    q_check = select(models.Session_Participant).where(models.Session_Participant.user_id == user_id, models.Session_Participant.session_id == quote.session_id)
+    participant = (await db.execute(q_check)).scalar_one_or_none()
+    if participant is None:
+        raise HTTPException(status_code=403, detail="must be auth-d")
+
+
     update_data = quote.model_dump(exclude_unset=True, exclude={"id"})
     
     if not update_data:
@@ -30,7 +47,7 @@ async def update_session_quote(quote: schemas.SessionQuoteUpdate, db: AsyncSessi
     stmt_select = select(models.Session_Quote).where(models.Session_Quote.id == quote.id)
     db_quote = (await db.execute(stmt_select)).scalars().first()
 
-    if hasattr(quote, "participant_id") and db_quote.participant_id != quote.participant_id:
+    if db_quote.participant_id != participant.id:
         raise HTTPException(status_code=403, detail="You are not allowed to update this quote")
     
     if not db_quote:
@@ -39,7 +56,7 @@ async def update_session_quote(quote: schemas.SessionQuoteUpdate, db: AsyncSessi
     stmt_update = (
         update(models.Session_Quote)
         .where(models.Session_Quote.id == quote.id)
-        .values(**update_data)
+        .values(**update_data, participant_id = participant.id)
         .execution_options(synchronize_session="fetch")
     )
     
@@ -54,16 +71,21 @@ async def update_session_quote(quote: schemas.SessionQuoteUpdate, db: AsyncSessi
     return db_quote
 
 async def delete_session_quote(
-    quote: schemas.SessionQuoteDelete,  
-    db: AsyncSession = Depends(get_session)
+        user_id:int,
+        quote: schemas.SessionQuoteDelete,  
+        db: AsyncSession = Depends(get_session)
 ):
+    q_check = select(models.Session_Participant).where(models.Session_Participant.user_id == user_id, models.Session_Participant.session_id == quote.session_id)
+    participant = (await db.execute(q_check)).scalar_one_or_none()
+    if participant is None:
+        raise HTTPException(status_code=403, detail="must be auth-d")
     stmt_select = select(models.Session_Quote).where(models.Session_Quote.id == quote.id)
     db_quote = (await db.execute(stmt_select)).scalars().first()
     
     if not db_quote:
         raise HTTPException(status_code=404, detail=f"Quote with id={quote.id} not found")
         
-    if hasattr(quote, "participant_id") and db_quote.participant_id != quote.participant_id:
+    if db_quote.participant_id != participant.id:
         raise HTTPException(status_code=403, detail="You are not allowed to delete this quote")
     
     stmt_delete = delete(models.Session_Quote).where(models.Session_Quote.id == quote.id)
@@ -83,7 +105,14 @@ async def get_session_quotes_by_session_id(session_id:int,db:AsyncSession = Depe
     result = (await db.execute(q)).scalars().all()
     return result
 
-async def get_session_quotes_by_session_participant_id(session_id:int,participant_id:int, db:AsyncSession = Depends(get_session)):
-    q = select(models.Session_Quote).where(models.Session_Quote.session_id == session_id).where(models.Session_Quote.participant_id == participant_id)
+async def get_session_quotes_by_session_user_id(
+        session_id:int,
+        user_id:int,
+        db:AsyncSession = Depends(get_session)):
+    q_check = select(models.Session_Participant).where(models.Session_Participant.user_id == user_id, models.Session_Participant.session_id == session_id)
+    participant = (await db.execute(q_check)).scalar_one_or_none()
+    if participant is None:
+        raise HTTPException(status_code=403, detail="must be auth-d")
+    q = select(models.Session_Quote).where(models.Session_Quote.session_id == session_id).where(models.Session_Quote.participant_id == participant.id)
     result = (await db.execute(q)).scalars().all()
     return result

@@ -10,9 +10,15 @@ from deps import get_session
 
 
 # session note notes
-async def create_session_note(note:schemas.SessionNoteCreate,db:AsyncSession = Depends(get_session)):
+async def create_session_note(user_id:int, note:schemas.SessionNoteCreate,db:AsyncSession = Depends(get_session)):
+    q_check = select(models.Session_Participant).where(models.Session_Participant.user_id == user_id, models.Session_Participant.session_id == note.session_id)
+    participant = (await db.execute(q_check)).scalar_one_or_none()
+    if participant is None:
+        raise HTTPException(status_code=403, detail="must be auth-d")
+    
     db_note = models.Session_Note(
-        **note.model_dump()
+        **note.model_dump(),
+        participant_id = participant.id
     )
     db.add(db_note)
     try:
@@ -22,7 +28,12 @@ async def create_session_note(note:schemas.SessionNoteCreate,db:AsyncSession = D
         raise HTTPException(status_code=400, detail=f'failed to create note {e}')
     return db_note
 
-async def update_session_note(note: schemas.SessionNoteUpdate, db: AsyncSession = Depends(get_session)):
+async def update_session_note(user_id:int, note: schemas.SessionNoteUpdate, db: AsyncSession = Depends(get_session)):
+    q_check = select(models.Session_Participant).where(models.Session_Participant.user_id == user_id, models.Session_Participant.session_id == note.session_id)
+    participant = (await db.execute(q_check)).scalar_one_or_none()
+    if participant is None:
+        raise HTTPException(status_code=403, detail="must be auth-d")
+    
     update_data = note.model_dump(exclude_unset=True, exclude={"id"})
     
     if not update_data:
@@ -31,7 +42,7 @@ async def update_session_note(note: schemas.SessionNoteUpdate, db: AsyncSession 
     stmt_select = select(models.Session_Note).where(models.Session_Note.id == note.id)
     db_note = (await db.execute(stmt_select)).scalars().first()
 
-    if hasattr(note, "participant_id") and db_note.participant_id != note.participant_id:
+    if db_note.participant_id != participant.id:
         raise HTTPException(status_code=403, detail="You are not allowed to update this note")
     
     if not db_note:
@@ -40,7 +51,7 @@ async def update_session_note(note: schemas.SessionNoteUpdate, db: AsyncSession 
     stmt_update = (
         update(models.Session_Note)
         .where(models.Session_Note.id == note.id)
-        .values(**update_data)
+        .values(**update_data, participant_id = participant.id)
         .execution_options(synchronize_session="fetch")
     )
     
@@ -55,16 +66,21 @@ async def update_session_note(note: schemas.SessionNoteUpdate, db: AsyncSession 
     return db_note
 
 async def delete_session_note(
-    note: schemas.SessionNoteDelete,  
-    db: AsyncSession = Depends(get_session)
+        user_id:int,
+        note: schemas.SessionNoteDelete,  
+        db: AsyncSession = Depends(get_session)
 ):
+    q_check = select(models.Session_Participant).where(models.Session_Participant.user_id == user_id, models.Session_Participant.session_id == note.session_id)
+    participant = (await db.execute(q_check)).scalar_one_or_none()
+    if participant is None:
+        raise HTTPException(status_code=403, detail="must be auth-d")
     stmt_select = select(models.Session_Note).where(models.Session_Note.id == note.id)
     db_note = (await db.execute(stmt_select)).scalars().first()
     
     if not db_note:
         raise HTTPException(status_code=404, detail=f"Note with id={note.id} not found")
         
-    if hasattr(note, "participant_id") and db_note.participant_id != note.participant_id:
+    if db_note.participant_id != participant.id:
         raise HTTPException(status_code=403, detail="You are not allowed to delete this note")
     
     stmt_delete = delete(models.Session_Note).where(models.Session_Note.id == note.id)
@@ -79,12 +95,30 @@ async def delete_session_note(
     return note
 
 
-async def get_session_notes_by_session_id(session_id:int,db:AsyncSession = Depends(get_session)):
+async def get_session_notes_by_session_id(
+        user_id:int,
+        session_id:int,db:AsyncSession = Depends(get_session)):
+    q_check = select(models.Session_Participant).where(models.Session_Participant.user_id == user_id, models.Session_Participant.session_id == session_id)
+    check_result = (await db.execute(q_check)).scalar_one_or_none()
+    if check_result is None:
+        raise HTTPException(status_code=403, detail="must be auth-d")
     q = select(models.Session_Note).where(models.Session_Note.session_id == session_id)
+    
     result = (await db.execute(q)).scalars().all()
     return result
 
-async def get_session_notes_by_session_participant_id(session_id:int,participant_id:int, db:AsyncSession = Depends(get_session)):
-    q = select(models.Session_Note).where(models.Session_Note.session_id == session_id).where(models.Session_Note.participant_id == participant_id)
+
+async def get_session_notes_by_session_user_id(
+        user_id:int,
+        session_id:int, db:AsyncSession = Depends(get_session)):
+    q_check = select(models.Session_Participant).where(models.Session_Participant.user_id == user_id, models.Session_Participant.session_id == session_id)
+    participant = (await db.execute(q_check)).scalar_one_or_none()
+    if participant is None:
+        raise HTTPException(status_code=403, detail="must be auth-d")
+    
+
+    q = select(models.Session_Note).where(models.Session_Note.session_id == session_id).where(models.Session_Note.participant_id == participant.id)
     result = (await db.execute(q)).scalars().all()
-    return result
+    q = select(models.Session_Note).where(models.Session_Note.session_id == session_id).where(models.Session_Note.is_private == False)
+    result2 = (await db.execute(q)).scalars().all()
+    return result, result2

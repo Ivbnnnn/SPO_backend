@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, UploadFile, Form, Query
+from fastapi import APIRouter, Depends, File, Request, Form, Query
 from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 import crud
@@ -13,23 +13,24 @@ async def add_session_quote(session_quote:schemas.SessionQuoteCreate,db:AsyncSes
     return await crud.create_session_quote(session_quote, db)
 @session_quote_router.get('/')
 async def get_session_quotes(
+        request:Request,
         session_id:int | None = Query(default=None),
-        participant_id:int | None = Query(default=None),
+        # participant_id:int | None = Query(default=None),
         db:AsyncSession = Depends(get_session)):
-    if session_id is None and participant_id is None:
-        # Формируем Pydantic-style error
+    if session_id is None:        
         raise HTTPException(
-            status_code=422,  # как у FastAPI при валидации
+            status_code=422,  
             detail=[
                 {
                     "loc": ["query", "session_id"],
-                    "msg": "either session_id or participant_id must be provided",
+                    "msg": "session_id must be provided",
                     "type": "value_error.missing"
                 }
             ]
         )
    
-    if session_id is not None and participant_id is None:
-        return await crud.get_session_quotes_by_session_id(session_id, db)
-    elif session_id is not None and participant_id is not None:
-        return await crud.get_session_quotes_by_session_participant_id(session_id, participant_id, db)
+    else:
+    #     session_id is not None and participant_id is None:
+    #     return await crud.get_session_quotes_by_session_id(session_id, db)
+    # elif session_id is not None and participant_id is not None:
+        return await crud.get_session_quotes_by_session_user_id(session_id, request.state.user.id, db)
