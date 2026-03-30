@@ -96,9 +96,9 @@ async def update_book(
 
 
 async def delete_book(book_id: int, db: AsyncSession):
-    # q = select(models.Book).where(models.book.book_id == book_id)
-    book = db.get(models.Book, book_id)
-    if not book:
+    q = select(models.Book).where(models.Book.id == book_id)
+    book = (await db.execute(q)).scalar_one_or_none()
+    if book is None:
         raise HTTPException(status_code=404, detail="book not found")
     old_cover_path = book.cover_img
     old_content_path = book.content_path

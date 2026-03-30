@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, UploadFile, Form, Query
+from fastapi import APIRouter, Depends, File, Request, Form, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.exceptions import HTTPException
 import crud
@@ -11,14 +11,14 @@ solo_session_quote_router = APIRouter(prefix="/solo_session/quote", tags=["solo_
 @solo_session_quote_router.post('/create')
 async def add_session_quote(
     solo_session_quote:schemas.SoloSessionQuoteCreate,
-    user:models.User = Depends(get_current_user),
+    request:Request,
     db:AsyncSession = Depends(get_session)):
-    return await crud.create_solo_session_quote(user, solo_session_quote, db)
+    return await crud.create_solo_session_quote(request.state.user, solo_session_quote, db)
 
 
 @solo_session_quote_router.get('/')
 async def get_session_quotes(
-        user:models.User = Depends(get_current_user),
+        request:Request,
         solo_session_id:int = Query(...),
         db:AsyncSession = Depends(get_session)):
     if solo_session_id is None:
@@ -33,5 +33,5 @@ async def get_session_quotes(
             ]
         )
     else:
-        return await crud.get_solo_session_quotes_by_solo_session_id(user, solo_session_id, db)
+        return await crud.get_solo_session_quotes_by_solo_session_id(request.state.user, solo_session_id, db)
   

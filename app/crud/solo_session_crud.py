@@ -10,14 +10,12 @@ from deps import get_session
 from passlib.context import CryptContext
 import uuid
 
-# Session
+# Solo_Session
 
 async def create_solo_session(user:models.User, book_id:int,db:AsyncSession = Depends(get_session)):
     user = await db.get(models.User, user.id)
     if not user:
         raise HTTPException(status_code=404, detail=f'user with id:{user.id} not found')
-    # if user.id != session.user_id:
-    #     raise HTTPException(status_code=403, detail=f'Anouthorized')
     book = await db.get(models.Book, book_id)
     if not book:
         raise HTTPException(status_code=404, detail=f'book with id:{book_id} not found')
