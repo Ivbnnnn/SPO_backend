@@ -1,10 +1,10 @@
 # app/models.py
-from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, Text, UniqueConstraint, Boolean
+from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, Text, UniqueConstraint, Boolean, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database import Base
 from typing import Optional, List
 from .answer_model import Answer
-
+from datetime import datetime, timezone
 
 class Session_Note(Base): 
     __tablename__ = "session_note"
@@ -17,7 +17,7 @@ class Session_Note(Base):
     comment:Mapped[str] = mapped_column(Text, nullable=False)
     start_index:Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     end_index:Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-
+    created_at:Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
 
     
     answers: Mapped[List["Answer"]] = relationship("Answer", back_populates="note", cascade="all, delete-orphan")

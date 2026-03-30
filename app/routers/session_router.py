@@ -26,6 +26,17 @@ async def get_session_participants(
     return participants
 
 
+
+@session_router.post('/notifications')
+async def get_session_participants(
+        session_notify:schemas.SessionNotifications,
+        requst:Request,
+        db:AsyncSession = Depends(get_session)):
+    result = await crud.get_notifications_by_user_id(offset=session_notify.offset, limit=session_notify.limit, user_id=requst.state.user.id, db=db)
+
+    return result
+
+
 @session_router.post('/{link}', summary="Переход по ссылке добавляет участника в сессию")
 async def join_by_link(
         link:str,

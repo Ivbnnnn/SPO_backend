@@ -6,6 +6,10 @@ class SessionBase(BaseModel):
     name: str
     book_id: int
 
+class SessionNotifications(BaseModel):
+    limit:int
+    offset:int
+
 class SessionCreate(SessionBase):
     pass
 
