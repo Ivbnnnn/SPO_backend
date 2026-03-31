@@ -15,7 +15,7 @@ class User(Base):
     password: Mapped[str] = mapped_column (String(250), nullable=False)
     email: Mapped[str] = mapped_column (String(50), nullable=False)
     background_color: Mapped[str]= mapped_column (String(50), default="white")
-    font_size: Mapped[str]= mapped_column (String(50), default="14")
+    font_size: Mapped[int]= mapped_column (Integer, default=14)
 
 
     books: Mapped[List["Book"]] = relationship ("Book", back_populates="user", cascade="all, delete-orphan")

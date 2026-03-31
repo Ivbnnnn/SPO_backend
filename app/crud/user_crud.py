@@ -38,15 +38,23 @@ async def read_user(user:schemas.UserRead,db:AsyncSession = Depends(get_session)
     return result.scalar_one_or_none()
 
 
-async def update_user(user:schemas.UserUpdate,db:AsyncSession = Depends(get_session)):
+async def update_user(user_id:int,user:schemas.UserUpdate,db:AsyncSession = Depends(get_session)):
     result = await db.execute(
-        select(models.User).where(models.User.id == user.id)
+        select(models.User).where(models.User.id == user_id)
     )
     db_user = result.scalar_one_or_none()
-    db_user.name = user.name
-    db_user.last_name = user.last_name
-    db_user.password = hash_password(user.password)
-    db_user.email = user.email
+    if user.name is not None:
+        db_user.name = user.name
+    if user.last_name is not None:
+        db_user.last_name = user.last_name
+    if user.password is not None:
+        db_user.password = hash_password(user.password)
+    if user.email is not None:  
+        db_user.email = user.email
+    if user.background_color is not None:  
+        db_user.background_color = user.background_color
+    if user.font_size is not None:  
+        db_user.font_size = user.font_size
     try:
         await db.commit()
         await db.refresh(db_user)
