@@ -12,12 +12,12 @@ class SoloSessionNoteCreate(SoloSessionNoteBase):
     end_index:int
 
 class SoloSessionNoteUpdate(SoloSessionNoteBase):
-    id:int
-    selected_text:str
-    color:str
-    comment:str
-    start_index:int
-    end_index:int
+    id: int
+    selected_text: str | None = None
+    color: str | None = None
+    comment: str | None = None
+    start_index: int | None = None
+    end_index: int | None = None
  
 class SoloSessionNoteRead(SoloSessionNoteCreate):
     id: int 
