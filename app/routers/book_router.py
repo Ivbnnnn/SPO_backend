@@ -1,14 +1,14 @@
-from fastapi import APIRouter, Depends, File, UploadFile, Form, Request
+from fastapi import APIRouter, Depends, File, UploadFile, Form, Request, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 import crud, models
 import schemas
 from deps import get_session
 from .auth_router import get_current_user
-
+from typing import Optional
 book_router = APIRouter(prefix="/book", tags=["book"] )
 
 
-@book_router.post('/add')
+@book_router.post('/')
 async def add_book(
     request:Request,
     title:str = Form(...),
@@ -19,35 +19,40 @@ async def add_book(
     ):
     return await crud.create_book(title,author ,request.state.user.id, book_cover,content, db)
 
-# @book_router.get('/get', response_model=schemas.BookRead)
-# async def add_book(
-#     title:str = Form(...),
-#     author:str = Form(...),
-#     user_id:int = Form(...),
-#     book_cover:UploadFile = File(...),
-#     content:UploadFile = File(...),
-#     db:AsyncSession = Depends(get_session)
-#     ):
-#     return await crud.create_book(title,author ,user_id,book_cover,content, db)
+@book_router.get('/{book_id}', response_model=schemas.BookRead)
+async def get_book(
+    book_id: int,
+    request: Request,
+    db: AsyncSession = Depends(get_session)
+):
+    return await crud.read_book_by_id(request.state.user.id, book_id, db)
 
-# @book_router.patch('/update', response_model=schemas.BookRead)
-# async def add_book(
-#     title:str = Form(...),
-#     author:str = Form(...),
-#     user_id:int = Form(...),
-#     book_cover:UploadFile = File(...),
-#     content:UploadFile = File(...),
-#     db:AsyncSession = Depends(get_session)
-#     ):
-#     return await crud.create_book(title,author ,user_id,book_cover,content, db)
 
-# @book_router.delete('/delete', response_model=schemas.BookRead)
-# async def add_book(
-#     title:str = Form(...),
-#     author:str = Form(...),
-#     user_id:int = Form(...),
-#     book_cover:UploadFile = File(...),
-#     content:UploadFile = File(...),
-#     db:AsyncSession = Depends(get_session)
-#     ):
-#     return await crud.create_book(title,author ,user_id,book_cover,content, db)
+@book_router.get('/', response_model=list[schemas.BookRead])
+async def get_books(
+    request: Request,
+    db: AsyncSession = Depends(get_session)
+):
+    return await crud.read_books_by_user(request.state.user.id, db)
+
+
+
+@book_router.patch('/{book_id}')
+async def update_book(
+    request:Request,
+    book_id: int,
+    title: Optional[str] = Form(None),
+    author: Optional[str] = Form(None),
+    book_cover: Optional[UploadFile] = File(None),
+    content: Optional[UploadFile] = File(None),
+    db:AsyncSession = Depends(get_session)
+    ):
+    return await crud.update_book(request.state.user.id,book_id,title,author,book_cover,content, db)
+
+@book_router.delete('/{book_id}')
+async def delete_book(
+    request:Request,
+    book_id: int,
+    db:AsyncSession = Depends(get_session)
+    ):
+    return await crud.delete_book(request.state.user.id, book_id, db)

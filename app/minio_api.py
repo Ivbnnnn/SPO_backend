@@ -2,7 +2,7 @@
 import io
 import uuid
 import logging
-from fastapi import APIRouter, UploadFile, File, HTTPException, Query
+from fastapi import APIRouter, UploadFile, File, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse, JSONResponse
 from starlette.concurrency import run_in_threadpool
 import json
@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 from ebooklib import epub, ITEM_DOCUMENT
 from tempfile import NamedTemporaryFile
 import os
+import schemas
 
 
 logger = logging.getLogger(__name__)
@@ -38,13 +39,19 @@ except Exception:
 
 #routes
 @minio_router.get("/books/cover/{object_name}", tags=["Minio"])
-async def proxy(object_name: str):        
-    data = client.get_object("books", object_name)    
+async def get_books_cover(
+    book:schemas.BookMinio,
+    request:Request,
+    object_name: str):        
+    data = client.get_object("books", object_name)  
+
+    
+      
     return StreamingResponse(data, media_type="image/jpeg")
 
 
 @minio_router.get("/books/content/{object_name}", tags=["Minio"])
-async def proxy(object_name: str,offset: int = Query(0, ge=0), limit: int = Query(10, ge=1)):        
+async def get_books_content(book:schemas.BookMinio, request:Request, object_name: str,offset: int = Query(0, ge=0), limit: int = Query(10, ge=1)):        
     try:
         response = client.get_object(bucket_name, object_name)
         content_bytes = response.read()

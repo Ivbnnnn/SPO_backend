@@ -1,4 +1,4 @@
-from .book_schema import BookCreate, BookRead,UploadBookResponse
+from .book_schema import BookCreate, BookRead,UploadBookResponse, BookUpdate, BookMinio, BookDelete
 from .user_schema import UserRead, UserCreate, UserUpdate
 from .session_schema import SessionBase, SessionCreate, SessionUpdate, SessionRead, SessionNotifications
 from .participant_schema import ParticipantBase,   ParticipantCreate, ParticipantRead

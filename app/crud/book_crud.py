@@ -42,14 +42,19 @@ async def create_book(
     return db_book
 
 #bookview
-async def read_book_by_id(book_id:int,db:AsyncSession = Depends(get_session)):    
+async def read_book_by_id(
+        user_id:int,
+        book_id:int,db:AsyncSession = Depends(get_session)):    
     book = await db.get(models.Book, book_id)
     if (not book):
         raise HTTPException(status_code=400, detail="Error")
+    if book.user_id != user_id:
+        raise HTTPException(status_code=403, detail="forbidden access")
     return book
 
 #UserPage
-async def read_books_by_user(user_id:int,db:AsyncSession = Depends(get_session)):
+async def read_books_by_user(
+        user_id:int,db:AsyncSession = Depends(get_session)):
     q = select(models.Book).where(models.Book.user_id == user_id)
     books = (await db.execute(q)).scalars().all()
     if (not books):
@@ -58,12 +63,12 @@ async def read_books_by_user(user_id:int,db:AsyncSession = Depends(get_session))
 
 # надо выключать при запросе file если не обновляем картинку
 async def update_book( 
-    book_id:int = Form(...),
-    title:str = Form(...),
-    author:str = Form(...),
-    # user_id:int = Form(...),
-    book_cover:UploadFile = File(...),
-    content:UploadFile = File(...),
+    user_id:int,
+    book_id:int ,
+    title: Optional[str] = Form(None),
+    author: Optional[str] = Form(None),
+    book_cover: Optional[UploadFile] = File(None),
+    content: Optional[UploadFile] = File(None),
     db:AsyncSession = Depends(get_session)
 ):
     q = select(models.Book).where(models.Book.id == book_id)
@@ -71,6 +76,8 @@ async def update_book(
 
     if book is None:
         raise HTTPException(status_code=404, detail="book not found")
+    if book.user_id != user_id:
+        raise HTTPException(status_code=403, detail="forbidden access")
     if title:
         book.title = title
     if author:
@@ -95,11 +102,15 @@ async def update_book(
     return book
 
 
-async def delete_book(book_id: int, db: AsyncSession):
+async def delete_book(
+        user_id:int,
+        book_id: int, db: AsyncSession):
     q = select(models.Book).where(models.Book.id == book_id)
     book = (await db.execute(q)).scalar_one_or_none()
     if book is None:
         raise HTTPException(status_code=404, detail="book not found")
+    if book.user_id != user_id:
+        raise HTTPException(status_code=403, detail="forbidden access")
     old_cover_path = book.cover_img
     old_content_path = book.content_path
     try:
