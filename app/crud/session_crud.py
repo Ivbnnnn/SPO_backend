@@ -14,10 +14,10 @@ from datetime import datetime
 async def create_session(session:schemas.SessionCreate,user_id:int,db:AsyncSession = Depends(get_session)):
     user = await db.get(models.User, user_id)
     if not user:
-        return HTTPException(status_code=404, detail=f'user with id:{user_id} not found')
+        raise HTTPException(status_code=404, detail=f'user with id:{user_id} not found')
     book = await db.get(models.Book, session.book_id)
     if not book:
-        return HTTPException(status_code=404, detail=f'book with id:{session.book_id} not found')
+        raise HTTPException(status_code=404, detail=f'book with id:{session.book_id} not found')
 
     db_session = models.Session(
         name=session.name,
@@ -31,7 +31,7 @@ async def create_session(session:schemas.SessionCreate,user_id:int,db:AsyncSessi
         await db.refresh(db_session)
     except:
         await db.rollback()
-        return HTTPException(status_code=400, detail="failed to create session")
+        raise HTTPException(status_code=400, detail="failed to create session")
     return db_session
 
 
@@ -74,4 +74,10 @@ async def get_notifications_by_user_id(offset:int, limit:int, user_id:int,db:Asy
     result = sorted(result, key=last_activity, reverse=True)
     paged = result[offset:offset + limit]
     return paged
+
+
+async def get_sessions_by_user_id(user_id:int,db:AsyncSession = Depends(get_session)):
+    result = (await db.execute(select(models.Session_Participant).options(selectinload(models.Session_Participant.session)).join(models.Session_Participant.session).where(models.Session_Participant.user_id==user_id))                         
+        ).scalars().all()
+    return result
 

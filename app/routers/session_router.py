@@ -7,21 +7,30 @@ from .auth_router import get_current_user
 
 session_router = APIRouter(prefix="/session", tags=["session"])
 
-@session_router.post('/create')
+@session_router.post('/')
 async def add_session(
         session:schemas.SessionCreate,
-        user:models.User = Depends(get_current_user),
+        request:Request,
         db:AsyncSession = Depends(get_session)):
-    db_session = await crud.create_session(session,user.id, db)
-    await crud.create_participant(user.id, db_session.id, db)
+    db_session = await crud.create_session(session,request.state.user.id, db)
+    await crud.create_participant(request.state.user.id, db_session.id, db)
 
     return db_session
-@session_router.get('/get/participants')
+@session_router.get('/{session_id}')
 async def get_session_participants(
         session_id:int,
-        user:models.User = Depends(get_current_user),
+        request:Request,
         db:AsyncSession = Depends(get_session)):
     participants = await crud.get_participants_by_session_id(session_id, db)
+
+    return participants
+
+
+@session_router.get('/')
+async def get_sessions(
+        request:Request,
+        db:AsyncSession = Depends(get_session)):
+    participants = await crud.get_sessions_by_user_id(request.state.user.id, db)
 
     return participants
 
